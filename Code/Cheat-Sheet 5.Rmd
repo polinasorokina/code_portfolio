@@ -1,0 +1,92 @@
+---
+title: "Cheat-Sheet 5"
+author: "Polina Sorokina"
+date: "February 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=TRUE, warning =FALSE}
+
+library(tidyverse)  
+library(cluster)    
+library(factoextra)
+```
+
+##Preliminary Work
+
+
+First, we download the data and remove all missing values.
+
+```{r}
+df <- USArrests
+df <-na.omit(df)
+```
+
+Then we scale/standarize the data using a scale function.
+
+```{r}
+df <- scale(df)
+```
+
+The following visualization illistrates which states have large dissimilarities (red) versus those that appear to be failry similar (teal). With the help of get_dist and fviz_dist from the factoextra.
+
+
+```{r}
+distance <- get_dist(df)
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+```
+
+Next, computing k-means clustering...
+
+```{r}
+k2 <- kmeans(df, centers = 2, nstart = 25)
+str(k2)
+
+```
+
+Viewing results with fviz_cluster...
+
+```{r}
+fviz_cluster(k2, data = df)
+
+```
+
+
+##Finding the optimal numbe rof clusters
+
+###Elbow method
+
+```{r}
+set.seed(123)
+
+fviz_nbclust(df, kmeans, method = "wss")
+```
+
+
+###Average Silhouette Method
+
+```{r}
+fviz_nbclust(df, kmeans, method = "silhouette")
+```
+
+
+###Gap Statisitc Method
+
+```{r}
+set.seed(123)
+gap_stat <- clusGap(df, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+fviz_gap_stat(gap_stat)
+```
+
+
+##Results
+
+```{r}
+set.seed(123)
+final <- kmeans(df, 4, nstart = 25)
+print(final)
+fviz_cluster(final, data = df)
+```
+
+
